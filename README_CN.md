@@ -1,4 +1,21 @@
 # codefuseEval: 代码大语言模型的多任务评估基准
+<div align="center">
+
+<p>
+    <a href="https://github.com/codefuse-ai/codefuse-evaluation">
+        <img alt="stars" src="https://img.shields.io/github/stars/codefuse-ai/codefuse-evaluation?style=social" />
+    </a>
+    <a href="https://github.com/codefuse-ai/codefuse-evaluation">
+        <img alt="forks" src="https://img.shields.io/github/forks/codefuse-ai/codefuse-evaluation?style=social" />
+    </a>
+    <a href="https://github.com/codefuse-ai/codefuse-evaluation/issues">
+      <img alt="Open Issues" src="https://img.shields.io/github/issues-raw/codefuse-ai/codefuse-evaluation" />
+    </a>
+</p>
+
+**中文** **｜** [English](README.md) 
+
+</div>
 
 codefuseEval在HumanEval-x、MBPP的基准上，结合CodeFuse大模型多任务场景，开发的编程领域多任务的评测基准， 可用于评估模型在代码补全，自然语言生成代码，测试用例生成、跨语言代码翻译，中文指令生成代码等多类任务的性能。
 
@@ -14,7 +31,6 @@ eg:
 bash codefuseEval/script/generation.sh CodeFuse-13B humaneval_python result/test.jsonl python
 ```
 
-🌐 <a href="README.md" target="_blank">English</a>
 
 ## 如何使用codefuseEval
 
