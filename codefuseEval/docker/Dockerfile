@@ -49,7 +49,7 @@ RUN update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 \
     && env
 
 #download benchmark and all dependencies
-RUN git clone https://github.com/codefuse-ai/codefuseEval.git
+RUN git clone https://github.com/codefuse-ai/codefuse-evaluation.git
 RUN cd codefuseEval && pip install -r requirements.txt
 
 WORKDIR /workspace/codefuseEval/
