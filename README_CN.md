@@ -1,4 +1,4 @@
-# codefuseEval: 代码大语言模型的多任务评估基准
+# CodeFuseEval: 代码大语言模型的多任务评估基准
 <div align="center">
 
 <p>
@@ -17,7 +17,7 @@
 
 </div>
 
-codefuseEval在HumanEval-x、MBPP的基准上，结合CodeFuse大模型多任务场景，开发的编程领域多任务的评测基准， 可用于评估模型在代码补全，自然语言生成代码，测试用例生成、跨语言代码翻译，中文指令生成代码等多类任务的性能。
+CodeFuseEval在HumanEval-x、MBPP的基准上，结合CodeFuse大模型多任务场景，开发的编程领域多任务的评测基准， 可用于评估模型在代码补全，自然语言生成代码，测试用例生成、跨语言代码翻译，中文指令生成代码等多类任务的性能。
 
 ## 推理环境：
 CodeFuse-13B: python 3.8及以上版本，pytorch 2.0及以上版本，transformers 4.24.0及以上版本，CUDA 11.4及以上；
