@@ -1,4 +1,70 @@
 {
-    "CodeFuse-CodeLlama-34B":"/mnt/user/qumu/merged_models/codellama-34b-python-mft-qlora-v1-step22000-merged",
-    "CodeFuse-13B":"/mnt/user/294761/bigcode/CodeFuse13B-evol-instruction-4K/"
-    }
+  "CodeFuse-13B": {
+    "path": "/mnt/user/294761/bigcode/CodeFuse13B-evol-instruction-4K/",
+    "processor_class": "codefuseEval.process.codefuse13b.Codefuse13BProcessor",
+    "tokenizer": {
+      "truncation": true,
+      "padding": true,
+      "max_length": 600
+    },
+    "generation_config": {
+      "greedy": {
+        "do_sample": false,
+        "num_beams": 1,
+        "max_new_tokens": 512
+      },
+      "beams": {
+        "do_sample": false,
+        "num_beams": 5,
+        "max_new_tokens": 600,
+        "num_return_sequences": 1
+      },
+      "dosample": {},
+      "temperature": 0.2,
+      "max_new_tokens": 600,
+      "num_return_sequences": 1,
+      "top_p": 0.9,
+      "num_beams": 1,
+      "do_sample": true
+    },
+    "task_mode": "code_completion",
+    "batch_size": 1,
+    "sample_num": 1,
+    "decode_mode": "beams"
+  },
+  "CodeFuse-CodeLlama-34B": {
+    "path": "/mnt/user/qumu/merged_models/codellama-34b-python-mft-qlora-v1-step22000-merged",
+    "processor_class": "codefuseEval.process.codefusellama34b.CodeFuseCodeLlama34BProcessor",
+    "tokenizer": {
+      "truncation": true,
+      "padding": true,
+      "max_length": 512
+    },
+    "generation_config": {
+      "greedy": {
+        "do_sample": false,
+        "num_beams": 1,
+        "max_new_tokens": 512
+      },
+      "beams": {
+        "do_sample": false,
+        "num_beams": 5,
+        "max_new_tokens": 600,
+        "num_return_sequences": 1
+      },
+      "dosample": {
+        "do_sample": true
+      },
+      "temperature": 0.2,
+      "max_new_tokens": 512,
+      "num_return_sequences": 1,
+      "top_p": 0.9,
+      "num_beams": 1,
+      "do_sample": false
+    },
+    "task_mode": "code_completion",
+    "batch_size": 1,
+    "sample_num": 1,
+    "decode_mode": "beams"
+  }
+}

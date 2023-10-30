@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from util import IMPORT_HELPER, read_dataset
 from metrics.metric import estimate_pass_at_k
 from execution import check_correctness, check_currentmetric
-from generation import EVAL_DATASET
+from generation_v2 import EVAL_DATASET
 
 LANGUAGE_NAME = {
     "cpp": "CPP",
@@ -47,7 +47,6 @@ METRIC_SUPPORT = [
     'matthews_correlation',
     'cuad',
     'wiki_split',
-    'cer',
     'mean_iou',
     'sacrebleu',
     'google_bleu',
@@ -78,6 +77,31 @@ METRIC_SUPPORT = [
     'chrf'
 ]
 
+def extract_code_before_main(code_str):
+    lines = code_str.split('\n')
+    main_index = -1
+    for i in range(len(lines)):
+        if "main()" in lines[i]:
+            main_index = i
+            break
+    if main_index == -1:
+        return code_str
+    else:
+        return '\n'.join(lines[:main_index])
+
+def remove_empty_lines(code):
+    lines = code.split("\n")  # 将代码按行分割成列表
+    new_code = ""
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.strip() != "":  # 如果当前行不是空行
+            if line.strip().startswith("def ") or line.strip().startswith("class ") or line.strip().startswith("import ") :  # 如果当前行是def函数的定义行
+                break  # 停止循环
+            new_code += line + "\n"  # 将非空行添加到新的代码字符串中
+        i += 1
+    new_code += "\n".join(lines[i:])  # 将剩余的代码添加到新的代码字符串中
+    return new_code
 
 def process_dataset(sample, problems, test_groundtruth=False):
     task_id = sample["task_id"]
@@ -117,53 +141,104 @@ def process_humaneval_test(sample, problems, codeTrans=False, test_groundtruth=F
         sample["generation"] = code
     code = sample["generation"]
     test = problems[task_id]["test"]
+    data_type = sample.get("Difficulty")
     if codeTrans:
         # codeTrans part of the code processing
         if language == "python":
-            code_ = []
-            for line in code.split("\n"):
-                if "def " in line and line[0] != ' ' and line[0] != '\t':
-                    code_.append("def " + line.split("def ")[1])
-                    continue
-                if "class" in line and line.strip().endswith(":"):
-                    code_.append(line)
-                    continue
-                if (len(line.strip()) > 0 and line[0] != ' ' and line[0] != '\t'):
-                    continue
-                code_.append(line)
-            code = "\n".join(code_)
-            test_setup = "\n".join(IMPORT_HELPER["python"]) + "\n"
-            if isinstance(test, List):
-                test = "\n".join(test)
-            test_string = test_setup + code + "\n\n" + test + "\n"
+            code = remove_empty_lines( code )
+            test_setup = "\n".join( IMPORT_HELPER["python"] ) + "\n"
+            if code.startswith( ("def", "import") ):
+                prompt_method_name = re.search( r'def\s+(\w+)', prompt ).group( 1 )
+                generation_method_name = re.search( r'def\s+(\w+)', code ).group( 1 )
+                if prompt_method_name != generation_method_name:
+                    code = re.sub( r'def\s+(\w+)', f'def {prompt_method_name}', code )
+                test_string = test_setup + code + "\n" + test + "\n"
+            else:
+                test_string = test_setup + prompt + code + "\n" + test + "\n"
+
+            print( "**********Test-python****************" )
+            print( test_string )
+            # test_string = code + "\n" + test + "\n"
         elif language == "cpp":
             test_set_up = ""
             for s in IMPORT_HELPER["cpp"]:
                 if s not in prompt:
                     test_set_up += s + "\n"
-            test_string = test_set_up + "\n" + code + "\n" + test
+            use_std = "using namespace std;"
+            test_string = ""
+            if code is not None:
+                match = re.search( r'\b(\w+)\(', code )
+                if match:
+                    method_name = match.group( 1 )
+                else:
+                    method_name = None
+
+                entry_point = sample.get( "entry_point" )
+                func_title = sample.get( "func_title" )
+                if func_title:
+                    func_title = re.search( r'(\w+)\(', func_title ).group( 1 )
+                if entry_point and method_name and entry_point != method_name:
+                    code = re.sub( r'\b(\w+)\(', f'{entry_point}(', code )
+                elif func_title and method_name and func_title != method_name:
+                    code = re.sub( r'\b(\w+)\(', f'{func_title}(', code )
+
+                if use_std not in code:
+                    test_string = "\n".join( [test_set_up, use_std, extract_code_before_main( code ), test] )
+                else:
+                    test_string = "\n".join( [test_set_up, extract_code_before_main( code ), test] )
+
+            else:
+                print( "无解决方法 task_id: " )
+                print( task_id )
+            print( "**********TestCPP****************" )
+            print( test_string )
         elif language == "java":
-            test_string = code + "\n" + test
+            test_setup = "\n".join( IMPORT_HELPER["java"] ) + "\n"
+            if data_type is not None and data_type == 'mbpp':
+                # 代码翻译mbpp
+                test_string = "\n".join( [code, test, ""] )
+
+            elif code.split( "\n" )[0].startswith( ("class", "import") ):
+                test_string = test_setup + code + "\n" + test
+            else:
+                test_string = test_setup + prompt + code + "\n" + test
+            print( "**********Test-JAVA****************" )
+            print( test_string )
+        elif language == "rust":
+            # print("**********Test-Rust****************")
+            main = "\nfn main(){ \n } \n"
+            test_string = main + prompt + code + test
+            print( test_string )
         elif language == "js" or language == "javascript":
-            test_string = code + "\n" + test
+            generation = ""
+            for line in code.split( "\n" ):
+                generation += line + "\n"
+                if line == "}" or line == "};":
+                    break
+            test_string = prompt + generation + "\n" + test
+            # test_string = code + "\n" + test
+            print( "**********Test-JS****************" )
+            print( test_string )
         elif language == "go":
             import_string = problems[task_id]["import"]
-            prompt = prompt.replace(import_string, "")
+            prompt = prompt.replace( import_string, "" )
+            test = problems[task_id]["test"]
             test_setup = problems[task_id]["test_setup"]
             other_pkgs = []
             for pkg in IMPORT_HELPER["go"]:
                 if pkg not in test_setup:
-                    p = pkg.split("/")[-1]
+                    p = pkg.split( "/" )[-1]
                     if p + "." in code:
-                        other_pkgs.append(f"\"{pkg}\"")
+                        other_pkgs.append( f"\"{pkg}\"" )
             if other_pkgs:
-                import_other_pkgs = "import (\n" + "    ".join([p + "\n" for p in other_pkgs]) + ")"
-                test_string = test_setup + "\n" + import_other_pkgs + "\n" + code + "\n" + test
+                import_other_pkgs = "import (\n" + "    ".join( [p + "\n" for p in other_pkgs] ) + ")"
+                test_string = test_setup + "\n" + import_other_pkgs + "\n" + prompt + code + "\n" + test
             else:
-                test_string = test_setup + "\n" + code + "\n" + test
+                test_string = test_setup + "\n" + prompt + code + "\n" + test
         else:
-            raise ValueError("current language: " + language + "not supported")
+            raise ValueError(f"codetrans target language: {language} not supported")
         return test_string
+
     else:
         # Pre-process for different languages
         if language == "python":
@@ -276,7 +351,7 @@ def evaluate_functional_correctness(
         n_workers: int = 5,
         timeout: float = 500.0,
         metric: str = "pass@k",
-        problem_file: str = "../data/external/CodeDataScience/CodeInsertion/Pandas/Pandas.jsonl",
+        problem_file: str = "humaneval_python",
         out_dir: str = None,
         test_groundtruth: bool = False,
         evaluation_kwargs: Dict = {}
