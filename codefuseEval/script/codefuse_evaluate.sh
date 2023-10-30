@@ -22,23 +22,11 @@ TEMP=0.0
 # mbpp_mode parameters, support en and cn
 # task_mode parameters：task type -- code_completion, text_to_code
 RUN_GENERATION_CMD="python \
-    $MAIN_DIR/generation.py \
+    $MAIN_DIR/generation_v2.py \
     --eval_dataset $EVALDATASET\
     --model_name $MODELNAME\
-    --decode_mode $DECODEMODE \
-    --sample_num $SAMPLENUM\
-    --batch_size $BATCHSIZE\
     --language $LANGUAGE\
-    --output_file $OUTFILE \
-    --return_tensors pt \
-    --padding True \
-    --max_new_tokens $MAXTOKENS \
-    --eos_token_id 2 \
-    --pad_token_id 0 \
-    --top_p $TOPP \
-    --temperature $TEMP \
-    --task_mode code_completion \
-    --mbpp_mode en"
+    --output_file $OUTFILE"
 
 echo "----------generation start!!!------------"
 echo $RUN_EVALUATION_CMD

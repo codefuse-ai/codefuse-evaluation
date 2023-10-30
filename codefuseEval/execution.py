@@ -405,15 +405,15 @@ def check_correctness(
 
             path = os.path.dirname(__file__)
             # copy the required input and reference answers to the execution directory
-            shutil.copytree(f"{path}/../data/external/CodeDataScience/{inspect}/{lib}/ans_{question_id}",
+            shutil.copytree(f"{path}/data/codedatascience/{inspect}/{lib}/ans_{question_id}",
                             tempdir_name + "/ans")
             if not (inspect == "CodeInsertion" and lib == "Matplotlib"):
-                shutil.copytree(f"{path}/../data/external/CodeDataScience/{inspect}/{lib}/input_{question_id}",
+                shutil.copytree(f"{path}/data/codedatascience/{inspect}/{lib}/input_{question_id}",
                                 tempdir_name + "/input")
-            shutil.copy(f"{path}/../data/external/CodeDataScience/math_equivalence.py",
+            shutil.copy(f"{path}/data/codedatascience/math_equivalence.py",
                         tempdir_name + "/math_equivalence.py")
             if question_id == "44" and lib == "Pytorch":
-                shutil.copy(f"{path}/../data/external/CodeDataScience/my_model.pt", tempdir_name + "/my_model.pt")
+                shutil.copy(f"{path}/data/codedatascience/my_model.pt", tempdir_name + "/my_model.pt")
 
             absexecutepath = os.path.abspath(tempdir_name)
             os.chdir(absexecutepath)
@@ -459,7 +459,7 @@ def check_correctness(
             except AssertionError as e:
                 result.append(f"failed: AssertionError")
             except BaseException as e:
-                result.append("failed:" + e.message)
+                result.append("failed:" + e.__class__.__name__)
 
             # Needed for cleaning up.
             shutil.rmtree = rmtree
@@ -684,8 +684,6 @@ def check_currentmetric(sample_jsonl, metric, lang="python", **kwargs):
         if metric == "bleu":
             from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
             chencherry = SmoothingFunction()
-            bleu_score1 = [metric_module.compute(predictions=[prediction], references=[reference], **kwargs) for
-                           reference, prediction in zip(references, predictions)]
             bleu_score = [sentence_bleu([reference], prediction, weights=(1, 0, 0, 0),
                                         smoothing_function=chencherry.method4) for reference, prediction in
                           zip(references, predictions)]
@@ -703,7 +701,7 @@ def check_currentmetric(sample_jsonl, metric, lang="python", **kwargs):
             from rouge_chinese import Rouge
             predictions = []
             references = []
-            for problem in processed_dataset:
+            for problem in sample_jsonl:
                 prediction_value = problem.get("generation", "NONE")
                 reference_value = problem.get("reference", "NONE")
                 predictions.append(' '.join(jieba.cut(prediction_value)))

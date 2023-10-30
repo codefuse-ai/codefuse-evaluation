@@ -1,30 +1,65 @@
 # CodeFuseEval: Multi-tasking Evaluation Benchmark for Code Large Language Model
 
-<div align="center">
+![img](./figures/logo.png)
 
-<p>
-    <a href="https://github.com/codefuse-ai/codefuse-evaluation">
-        <img alt="stars" src="https://img.shields.io/github/stars/codefuse-ai/codefuse-evaluation?style=social" />
-    </a>
-    <a href="https://github.com/codefuse-ai/codefuse-evaluation">
-        <img alt="forks" src="https://img.shields.io/github/forks/codefuse-ai/codefuse-evaluation?style=social" />
-    </a>
-    <a href="https://github.com/codefuse-ai/codefuse-evaluation/issues">
-      <img alt="Open Issues" src="https://img.shields.io/github/issues-raw/codefuse-ai/codefuse-evaluation" />
-    </a>
-</p>
+CodeFuseEval is a Code Generation benchmark that combines the multi-tasking scenarios of CodeFuse Model with the benchmarks of HumanEval-x and MBPP. This benchmark is designed to evaluate the performance of models in various multi-tasking tasks, including code completion, code generation from natural language, test case generation, cross-language code translation, and code generation from Chinese commands, among others.Continuously open, stay tuned !
 
-[中文](README_CN.md) **｜** **English**
 
-</div>
+🌐 <a href="README_CN.md" target="_blank">中文</a>
 
-CodeFuseEval is a Code Generation benchmark that combines the multi-tasking scenarios of CodeFuse Model with the benchmarks of HumanEval-x and MBPP. This benchmark is designed to evaluate the performance of models in various multi-tasking tasks, including code completion, code generation from natural language, test case generation, cross-language code translation, and code generation from Chinese commands, among others.
-
+![img](./figures/EnglishIntroduction.png)
 
 ## Generation environment：
 CodeFuse-13B: Python 3.8 or above,PyTorch 1.12 or above, with a recommendation for 2.0 or above, Transformers 4.24.0 or above ,CUDA 11.4 or above (for GPU users and flash-attention users, this option should be considered).
 
 CodeFuse-CodeLlama-34B:python>=3.8,pytorch>=2.0.0,transformers==4.32.0,Sentencepiece,CUDA 11.
+
+### Generation Processor：
+We designed an infrastructure called Processor. Its main purpose is to handle the differences between different models. It mainly needs to complete three abstract functions:
+*   ``load_model_tokenizer``:Due to differences in model loading parameters and tokenizer terminators, models need to use different parameters for adaptation and loading. The current function is mainly to help users load and adapt different models.
+*   ``process_before``: Since prompt adapts to different prompt styles according to different types of evaluation tasks or different models selected by users, the 「process_before」function is extracted mainly to help users process prompts.
+*   ``process_after``:Due to the diversity of model generation results, in order to adapt to the evaluation framework, the generated result data can be spliced into appropriate use cases for automated operation. The current function mainly processes the generated results to adapt to the evaluation data set and results based on the task type and data set conditions.
+
+
+We also modified the relevant configuration of ckpt_config to save the evaluation. For example: 
+```commandline
+{
+  "CodeFuse-13B": {
+    "path": "/mnt/user/294761/bigcode/CodeFuse13B-evol-instruction-4K/", // model path
+    "processor_class": "codefuseEval.process.codefuse13b.Codefuse13BProcessor", // processor path (please create file in "codefuseEval.process")
+    "tokenizer": {
+      "truncation": true,
+      "padding": true,
+      "max_length": 600
+    },                           // params for tokenizer to encode input prompts 
+    "generation_config": {       // generation_config, you can combine 「decode_mode」 param set your own decode, please use jsonObject to set different decodemode. Non-JsonObject data will be read directly into generation config 
+      "greedy": {
+        "do_sample": false,
+        "num_beams": 1,
+        "max_new_tokens": 512
+      },
+      "beams": {
+        "do_sample": false,
+        "num_beams": 5,
+        "max_new_tokens": 600,
+        "num_return_sequences": 1
+      },
+      "dosample": {
+        "do_sample": true
+      },
+      "temperature": 0.2,
+      "max_new_tokens": 600,
+      "num_return_sequences": 1,
+      "top_p": 0.9,
+      "num_beams": 1,
+      "do_sample": true
+    },
+    "task_mode": "code_completion",//current support [code_completion,nl2code,code_trans,codescience] four kinds, if you eval_dataset support many task, suggest you set task mode to get suitable process
+    "batch_size": 1,
+    "sample_num": 1,
+    "decode_mode": "beams" //decode_mode, The configuration of the corresponding decoding mode will be set to the generation config.
+  }
+```
 
 ## Generation Comand：
 
@@ -35,7 +70,15 @@ eg:
 bash codefuseEval/script/generation.sh CodeFuse-13B humaneval_python result/test.jsonl python
 ```
 
-## How to use codefuseEval
+if you want to test code translation, the language is source language. For Example:
+if you want test the cpp code translate into python
+
+```bash
+bash codefuseEval/script/generation.sh CodeFuse-CodeLlama-34B codeTrans_cpp_to_python result/test.jsonl cpp
+```
+
+
+## How to use CodeFuseEval
 
 ### Evaluation Data
 Data are stored in ``codefuseEval/data``, using JSON list format. We first integrated humaneval-X dataset.
@@ -56,16 +99,17 @@ Data are stored in ``codefuseEval/data``, using JSON list format. We first integ
 The evaluation of the generated codes involves compiling and running in multiple programming languages. The versions of the programming language environments and packages we use are as follows:
 
 | Dependency | Version  |
-| ---------- | -------- |
-| Python     | 3.8.12   |
+| ---------- |----------|
+| Python     | 3.10.9   |
 | JDK        | 18.0.2.1 |
 | Node.js    | 16.14.0  |
 | js-md5     | 0.7.3    |
 | C++        | 11       |
 | g++        | 7.5.0    |
-| Boost      | 1.71.0   |
+| Boost      | 1.75.0   |
 | OpenSSL    | 3.0.0    |
 | go         | 1.18.4   |
+| cargo      | 1.71.1   |
 
 In order to save everyone the trouble of setting up the environments for these languages, we create a Docker image with the required environments and codefuseEval.
 ```bash
@@ -131,6 +175,7 @@ bash codefuseEval/script/check_reference.sh codefuseEval/result/CodeFuse-13B/hum
 ```
 
 # Check dataset Command：
+CodeCompletion
 ```bash
 bash codefuseEval/script/check_dataset.sh humaneval_python
 
@@ -143,6 +188,54 @@ bash codefuseEval/script/check_dataset.sh humaneval_rust
 bash codefuseEval/script/check_dataset.sh humaneval_go
 
 bash codefuseEval/script/check_dataset.sh humaneval_cpp
+```
+NL2Code
+```bash
+bash codefuseEval/script/check_dataset.sh mbpp
+```
+CodeTrans
+```
+bash codefuseEval/script/check_dataset.sh codeTrans_python_to_java
+
+bash codefuseEval/script/check_dataset.sh codeTrans_python_to_cpp
+
+bash codefuseEval/script/check_dataset.sh codeTrans_cpp_to_java
+
+bash codefuseEval/script/check_dataset.sh codeTrans_cpp_to_python
+
+bash codefuseEval/script/check_dataset.sh codeTrans_java_to_python
+
+bash codefuseEval/script/check_dataset.sh codeTrans_java_to_cpp
+```
+CodeScience
+```
+bash codefuseEval/script/check_dataset.sh codeCompletion_matplotlib
+
+bash codefuseEval/script/check_dataset.sh codeCompletion_numpy
+
+bash codefuseEval/script/check_dataset.sh codeCompletion_pandas
+
+bash codefuseEval/script/check_dataset.sh codeCompletion_pytorch
+
+bash codefuseEval/script/check_dataset.sh codeCompletion_scipy
+
+bash codefuseEval/script/check_dataset.sh codeCompletion_sklearn
+
+bash codefuseEval/script/check_dataset.sh codeCompletion_tensorflow
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_matplotlib
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_numpy
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_pandas
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_pytorch
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_scipy
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_sklearn
+
+bash codefuseEval/script/check_dataset.sh codeInsertion_tensorflow
 ```
 
 

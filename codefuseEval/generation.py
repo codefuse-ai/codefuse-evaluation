@@ -10,6 +10,7 @@ import gzip
 import fire
 from copy import deepcopy
 import transformers
+from util import EVAL_DATASET
 
 from transformers import (
     AutoTokenizer,
@@ -63,16 +64,6 @@ LANGUAGE_TAG = {
     "fortran": "!language: Fortran",
     "lean": "-- language: Lean",
 }
-
-EVAL_DATASET = {
-    "humaneval_python": os.path.join(os.path.dirname(__file__), "data", "code_completion", "humaneval_python.jsonl"),
-    "humaneval_js": os.path.join(os.path.dirname(__file__), "data", "code_completion", "humaneval_js.jsonl"),
-    "humaneval_java": os.path.join(os.path.dirname(__file__), "data", "code_completion", "humaneval_java.jsonl"),
-    "humaneval_go": os.path.join(os.path.dirname(__file__), "data", "code_completion", "humaneval_go.jsonl"),
-    "humaneval_rust": os.path.join(os.path.dirname(__file__), "data", "code_completion", "humaneval_rust.jsonl"),
-    "humaneval_cpp": os.path.join(os.path.dirname(__file__), "data", "code_completion", "humaneval_cpp.jsonl")
-}
-
 
 def get_tc_prompt(mbpp_mode, item):
     if mbpp_mode == "en":  # 英文原版
@@ -388,7 +379,7 @@ def main(
         f" task_mode={task_mode}, mbpp_mode={mbpp_mode}")
 
     ckpt_dict = json.load(open("codefuseEval/ckpt_config.json"))
-    ckpt_path = ckpt_dict[model_name]
+    ckpt_path = ckpt_dict[model_name].get("path")
     if not ckpt_path:
         raise ValueError("unknown ckpt_version")
     if not output_file.endswith(".jsonl"):

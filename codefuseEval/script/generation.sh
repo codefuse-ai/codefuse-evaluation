@@ -10,27 +10,14 @@ MAIN_DIR=$(dirname "$SCRIPT_DIR")
 
 echo $MAIN_DIR
 
-BATCHSIZE=1
-DECODEMODE="beams"
-SAMPLENUM=1
-MAXTOKENS=600
-TOPP=0.95
-TEMP=0.2
-
 # mbpp_mode parameters, support en and cn
 # task_mode parameters：task type -- code_completion, text_to_code
 RUN_GENERATION_CMD="python \
-    $MAIN_DIR/generation.py \
+    $MAIN_DIR/generation_v2.py \
     --eval_dataset $EVALDATASET\
     --model_name $MODELNAME\
-    --decode_mode $DECODEMODE \
-    --sample_num $SAMPLENUM\
-    --batch_size $BATCHSIZE\
     --language $LANGUAGE\
-    --output_file $OUTFILE \
-    --temperature $TEMP \
-    --task_mode code_completion \
-    --mbpp_mode en"
+    --output_file $OUTFILE"
 
 echo "----------generation start!!!------------"
 echo $RUN_EVALUATION_CMD
