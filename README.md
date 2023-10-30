@@ -1,6 +1,6 @@
 # CodeFuseEval: Multi-tasking Evaluation Benchmark for Code Large Language Model
 
-![img](./figures/logo.png)
+![img](./figures/logo.jpeg)
 
 CodeFuseEval is a Code Generation benchmark that combines the multi-tasking scenarios of CodeFuse Model with the benchmarks of HumanEval-x and MBPP. This benchmark is designed to evaluate the performance of models in various multi-tasking tasks, including code completion, code generation from natural language, test case generation, cross-language code translation, and code generation from Chinese commands, among others.Continuously open, stay tuned !
 
