@@ -1,6 +1,6 @@
 {
   "CodeFuse-13B": {
-    "path": "/mnt/user/294761/bigcode/CodeFuse13B-evol-instruction-4K/",
+    "path": "/mnt/model/CodeFuse13B-evol-instruction-4K/",
     "processor_class": "codefuseEval.process.codefuse13b.Codefuse13BProcessor",
     "tokenizer": {
       "truncation": true,
@@ -33,7 +33,7 @@
     "decode_mode": "beams"
   },
   "CodeFuse-CodeLlama-34B": {
-    "path": "/mnt/user/qumu/merged_models/codellama-34b-python-mft-qlora-v1-step22000-merged",
+    "path": "/mnt/model/codellama-34b-python-mft-qlora-v1-step22000-merged",
     "processor_class": "codefuseEval.process.codefusellama34b.CodeFuseCodeLlama34BProcessor",
     "tokenizer": {
       "truncation": true,
