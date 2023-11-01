@@ -9,7 +9,7 @@ setuptools==65.6.3
 cpm_kernels==1.0.11
 deepspeed==0.8.3
 huggingface-hub==0.16.4
-numpy==1.21.6
+numpy==1.22
 matplotlib==3.5.2
 gensim==4.2.0
 DateTime==4.7

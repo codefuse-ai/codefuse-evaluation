@@ -27,7 +27,7 @@ process_after：由于模型生成结果多样性，为了适配评测框架，�
 ```commandline
 {
   "CodeFuse-13B": {
-    "path": "/mnt/user/294761/bigcode/CodeFuse13B-evol-instruction-4K/", // 模型路径
+    "path": "/mnt/model/CodeFuse13B-evol-instruction-4K/", // 模型路径
     "processor_class": "codefuseEval.process.codefuse13b.Codefuse13BProcessor", // 处理器路径 (请把处理器类文件放在codefuseEval/process/下,否则会读取失败)
     "dataset": "humaneval_python", // 评测数据集
     "language": "python",
