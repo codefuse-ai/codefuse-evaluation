@@ -26,7 +26,7 @@ We also modified the relevant configuration of ckpt_config to save the evaluatio
 ```commandline
 {
   "CodeFuse-13B": {
-    "path": "/mnt/user/294761/bigcode/CodeFuse13B-evol-instruction-4K/", // model path
+    "path": "/mnt/model/CodeFuse13B-evol-instruction-4K/", // model path
     "processor_class": "codefuseEval.process.codefuse13b.Codefuse13BProcessor", // processor path (please create file in "codefuseEval.process")
     "tokenizer": {
       "truncation": true,
