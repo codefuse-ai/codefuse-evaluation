@@ -4,7 +4,8 @@ OUTFILE=$1
 METRIC=$2
 PROBLEMFILE=$3
 
-SCRIPT_PATH=$(realpath "$0")
+#SCRIPT_PATH=$(realpath "$0")
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
 MAIN_DIR=$(dirname "$SCRIPT_DIR")
 

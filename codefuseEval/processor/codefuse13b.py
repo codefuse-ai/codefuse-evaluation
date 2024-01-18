@@ -19,7 +19,7 @@ class Codefuse13BProcessor( BaseProcessor ):
         print( tokenizer )
         return model, tokenizer
 
-    def process_before(self, dataset, language, task_mode, **kwargs):
+    def process_before(self, dataset, language, task_mode, dataset_name, **kwargs):
         """
         """
         print(f"-------{__class__.__name__} process the prompt according to the current task mode: {task_mode} -------")
@@ -30,7 +30,7 @@ class Codefuse13BProcessor( BaseProcessor ):
                 item["prompt"] = prompt
         return dataset
 
-    def process_after(self, dataset, language, task_mode, **kwargs):
+    def process_after(self, dataset, language, task_mode, dataset_name, **kwargs):
         print(f"======={__class__.__name__} process the generated results according to the current task mode: {task_mode} =======")
         for output_ori in dataset:
             if task_mode == "code_completion":

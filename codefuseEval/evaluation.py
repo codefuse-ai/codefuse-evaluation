@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from util import IMPORT_HELPER, read_dataset
 from metrics.metric import estimate_pass_at_k
 from execution import check_correctness, check_currentmetric
-from generation_v2 import EVAL_DATASET
+from generation import EVAL_DATASET
 
 LANGUAGE_NAME = {
     "cpp": "CPP",
@@ -133,7 +133,7 @@ def process_humaneval_test(sample, problems, codeTrans=False, test_groundtruth=F
     language = task_id.split("/")[0].lower()
     if "ds1000" in language:
         language = "ds1000"
-    prompt = sample["prompt"]
+    prompt = problems[task_id]["prompt"]+"\n"
     if test_groundtruth:
         code = sample.get("reference", None)
         if code is None:
@@ -349,7 +349,7 @@ def evaluate_functional_correctness(
         input_file: str = "../test/humaneval_generation_rust.jsonl",
         tmp_dir: str = "./",
         n_workers: int = 5,
-        timeout: float = 500.0,
+        timeout: float = 120.0,
         metric: str = "pass@k",
         problem_file: str = "humaneval_python",
         out_dir: str = None,
@@ -391,7 +391,7 @@ def evaluate_functional_correctness(
         else:
             raise ValueError("problem_file parameter is illgal, can not load")
 
-    suffix = "_result.jsonl"
+    suffix = "_evaluation_result.jsonl"
 
     for problemfile in problem_files:
         if "trans" in problemfile.lower():
@@ -424,7 +424,7 @@ def evaluate_functional_correctness(
                 sample = sample_jsonl[0]
                 task_id = sample["task_id"]
                 lang = task_id.split("/")[0].lower()
-                if "ds1000" in lang and "Tensorflow" in lang:
+                if "ds1000" in lang and "tensorflow" in lang:
                     n_workers = 1
             with ThreadPoolExecutor(max_workers=n_workers) as executor:
                 futures = []
@@ -504,6 +504,9 @@ def evaluate_functional_correctness(
                 results = check_currentmetric(sample_jsonl, metric, lang, **evaluation_kwargs)
                 print(results)
 
+        total_time_cost = sum( [sample.get( "processing_time", 0 ) for sample in sample_jsonl] )
+        print(f"Generation Total time cost: {total_time_cost}")
+        print(f"Generation Average time cost: {total_time_cost / len(list(sample_jsonl))}")
         print("Writing to: ", out_file)
         if metric == "pass@k":
             if out_file.endswith(".gz"):

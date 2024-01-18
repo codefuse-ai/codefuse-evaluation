@@ -1,404 +1,263 @@
-''' inference scripts '''
-import os
-import torch
-import sys
-import time
-from tqdm import tqdm
-import re
-import json
 import gzip
-import fire
-from copy import deepcopy
+import os
+import importlib
+import json
+from tqdm.auto import tqdm
 import transformers
-from util import EVAL_DATASET
+from transformers import GenerationConfig
+from copy import deepcopy
+from util import EVAL_DATASET, DATASET_SUPPORT, ALL_DECODE_MODE, DATASET_LANGUAGE, write_jsonl
+import fire
+import time
+import numpy as np
 
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    AutoConfig,
-    LlamaTokenizer,
-    LlamaForCausalLM,
-    GenerationConfig
-)
-
+# model information and evaluation configs
+CKPT_CONFIG = json.load( open( os.path.join( os.path.dirname( __file__ ), "ckpt_config.json" ), "r" ) )
 transformers.logging.set_verbosity_error()
 
-HUMAN_ROLE_START_TAG = "<|role_start|>human<|role_end|>"
-BOT_ROLE_START_TAG = "<|role_start|>bot<|role_end|>"
 
-LANGUAGE_TAG = {
-    "c++": "// language: C++",
-    "numpy": "# language: Python",
-    "Pandas": "# language: Python",
-    "Pytorch": "# language: Python",
-    "Scipy": "# language: Python",
-    "Sklearn": "# language: Python",
-    "Tensorflow": "# language: Python",
-    "matplotlib": "# language: Python",
-    "cpp": "// language: C++",
-    "c": "// language: C",
-    "csharp": "// language: C#",
-    "cs": "// language: C#",
-    "c#": "// language: C#",
-    "cuda": "// language: Cuda",
-    "objective-c": "// language: Objective-C",
-    "objective-c++": "// language: Objective-C++",
-    "python": "# language: Python",
-    "perl": "# language: Perl",
-    "java": "// language: Java",
-    "scala": "// language: Scala",
-    "tex": f"% language: TeX",
-    "html": "<!--language: HTML-->",
-    "php": "// language: PHP",
-    "js": "// language: JavaScript",
-    "javascript": "// language: JavaScript",
-    "typescript": "// language: TypeScript",
-    "go": "// language: Go",
-    "shell": "# language: Shell",
-    "rust": "// language: Rust",
-    "css": "/* language: CSS */",
-    "sql": "-- language: SQL",
-    "kotlin": "// language: Kotlin",
-    "pascal": "// language: Pascal",
-    "r": "# language: R",
-    "fortran": "!language: Fortran",
-    "lean": "-- language: Lean",
-}
+def load_dataset(file_path):
+    """
+    check dataset and load dataset
+    """
+    if not os.path.exists( file_path ):
+        raise FileNotFoundError( f"{file_path} not found" )
 
-def get_tc_prompt(mbpp_mode, item):
-    if mbpp_mode == "en":  # 英文原版
-        prompt = item["prompt"] + "Your code should satisfy these tests:\n" + "\n".join(item["test"])
-    elif mbpp_mode == "cn":  # 中文原版
-        prompt = item["prompt_text_chinese"] + "你的代码必须能够通过这些测试用例:\n" + "\n".join(item["test"])
+    if not (file_path.endswith( ".jsonl.gz" ) or file_path.endswith( ".jsonl" )):
+        raise ValueError( f"{file_path} is not a jsonl file or jsonl.gz file" )
+
+    dataset = []
+    if file_path.endswith( ".jsonl.gz" ):
+        with gzip.open( file_path, "rt" ) as f:
+            for line in f:
+                try:
+                    data = json.loads( line )
+                    dataset.append( data )
+                except json.JSONDecodeError:
+                    print( f"{line} is not a valid json" )
     else:
-        raise ValueError("unknown mbpp_mode, en or cn expected.")
-    return prompt
+        with open( file_path, "r" ) as f:
+            for line in f:
+                try:
+                    data = json.loads( line )
+                    dataset.append( data )
+                except json.JSONDecodeError:
+                    print( f"{line} is not a valid json" )
+    return dataset
 
 
-def load_model_tokenizer(path, model_name):
-    print("********* path *********")
-    print("path========: ", path)
-    print("model_name========: ", model_name)
-    st = time.time()
-    if model_name == "CodeFuse-CodeLlama-34B":
-        tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True, use_fast=False, legacy=False)
-        tokenizer.eos_token = "</s>"
-        tokenizer.pad_token = "<unk>"
-        tokenizer.eos_id = tokenizer._convert_token_to_id(tokenizer.eos_token)
-        tokenizer.pad_id = tokenizer._convert_token_to_id(tokenizer.pad_token)
-        tokenizer.padding_side = "left"
-        print(tokenizer)
-        print(f"eos_token_id: {tokenizer.eos_token_id}, pad_token_id: {tokenizer.pad_token_id}")
-        config, unused_kwargs = AutoConfig.from_pretrained(path, trust_remote_code=True, return_unused_kwargs=True)
-        config_dict = config.to_dict()
-        config_dict["use_flash_attn"] = 1
-        config_dict["use_xformers"] = 1
-
-        model = AutoModelForCausalLM.from_pretrained(path, config=config, device_map="auto", torch_dtype=torch.bfloat16,
-                                                     trust_remote_code=True, use_safetensors=False)
-
-        print("ids========: ")
-        print(tokenizer.eos_id, tokenizer.pad_id)
-
-    elif model_name == "CodeFuse-13B":
-        tokenizer = AutoTokenizer.from_pretrained(path)
-        model = AutoModelForCausalLM.from_pretrained(path, load_in_8bit=False, torch_dtype=torch.float16,
-                                                     device_map="auto")
-        model.config.pad_token_id = tokenizer.pad_token_id
-        model.half()
-        model.eval()
-        if torch.__version__ >= "2" and sys.platform != "win32":
-            model = torch.compile(model)
+def load_modelprocess(model_name, model_version, *args, **kwargs):
+    """
+    load model process to load model and tokenizer && load dataset processor
+    """
+    path = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "processor_class", None )
+    if "/" in path:
+        module_path, class_name = path.rsplit( "/", 1 )
+        module_path = module_path.split( "processor" )[1:]
+        module_path = "processor".join( module_path ).replace( "/", "." )
+    elif "." in path:
+        module_path, class_name = path.rsplit( ".", 1 )
+        module_path = module_path.split( "processor" )[1:]
+        module_path = "processor".join( module_path )
     else:
-        raise ValueError("unknown model_name, CodeFuse-CodeLlama-34B and CodeFuse-13B supported.")
+        raise ValueError( f"{path} is invalid,can not find module and class" )
+    try:
+        module = importlib.import_module( module_path, package="processor" )
+        module_class = getattr( module, class_name )
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError( f"module {module_path} can not find in package processor" )
+    except AttributeError:
+        raise AttributeError( f"{path} can not find current class" )
+    return module_class( *args, **kwargs )
 
-    print("loading model========  ")
-    print('Model load spend: {:.4f}s'.format(time.time() - st))
-    print(tokenizer)
 
-    return model, tokenizer
-
-
-def generate_outputs(model, tokenizer, prompt_list, decode_mode, temperature, model_name):
-    if model_name == "CodeFuse-13B":
-        print(tokenizer.pad_token_id)
+def generate_outputs(model, tokenizer, prompt_list, model_name, model_version):
+    """
+    Generate outputs based on model information and prompts
+    """
+    decode_mode = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "decode_mode", "dosample" )
+    generate_config = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "generation_config", {} )
+    tokenizer_param = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "tokenizer", {} )
+    if not generate_config:
+        print( "Can not find generate_config in config.json,use default config!!!!!" )
         generation_config = GenerationConfig(
             pad_token_id=tokenizer.pad_token_id,
-            temperature=temperature,
-            max_new_tokens=600,
-            num_return_sequences=1,
             eos_token_id=tokenizer.eos_token_id,
-            num_beams=3,
-            top_p=0.95
-        )
-        inputs = tokenizer(prompt_list, return_tensors="pt", truncation=True, padding=True, max_length=600).to("cuda")
-    else:
-        generation_config = GenerationConfig(
-            pad_token_id=tokenizer.pad_token_id,
-            temperature=temperature,
             max_new_tokens=512,
             num_return_sequences=1,
-            eos_token_id=tokenizer.eos_token_id,
             num_beams=1,
-            top_p=0.9
-        )
-        inputs = tokenizer(prompt_list, return_tensors="pt", padding=True, add_special_tokens=False).to("cuda")
-
-    if decode_mode == "greedy":
-        generation_config.do_sample = False
-        generation_config.num_beams = 1
-        generation_config.max_new_tokens = 512
-    elif decode_mode == "beams":
-        generation_config.do_sample = False
-        generation_config.num_beams = 5
-        generation_config.max_new_tokens = 600
-        generation_config.num_return_sequences = 1
+            top_p=0.9 )
     else:
-        raise ValueError("unknown decode_mode, only support greedy and beams.")
+        generate_config_params = deepcopy( generate_config )
+        # pop all decode strategies config, left configs all load for generation_config
+        for mode in generate_config:
+            if mode in generate_config_params and isinstance( generate_config.get( mode ), dict ):
+                generate_config_params.pop( mode )
+        generation_config = GenerationConfig(
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            **generate_config_params
+        )
+    # according decode_mode to set generation_config
+    for key, value in generate_config.get( decode_mode, {} ).items():
+        setattr( generation_config, key, value )
 
+    inputs = tokenizer( prompt_list, return_tensors="pt", **tokenizer_param ).to( "cuda" )
     generate_ids = model.generate(
         inputs=inputs["input_ids"],
         attention_mask=inputs["attention_mask"],
         **generation_config.to_dict()
     )
-
-    outputs = tokenizer.batch_decode(generate_ids[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+    outputs = tokenizer.batch_decode( generate_ids[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True )
     return outputs
 
 
-def stop_word_post_process(stop_words, trg_prediction):
-    for stop_word in stop_words:
-        if stop_word in trg_prediction:
-            trg_prediction = trg_prediction.split(stop_word)[0]
-
-    return trg_prediction
-
-
-def post_process_mkcode(language, data):
-    print("********* post_process_mkcode *********")
-    print(data)
-    re_result = re.findall(f"```{language}(.*?)```", data, re.DOTALL | re.IGNORECASE)
-    if len(re_result) > 0:
-        data = re.sub(f'```{language}|```', '', re_result[0], flags=re.IGNORECASE)
-    if "import" in data:
-        end_id = 0
-        if '"""' in data:
-            first_id = data.find('"""') + 3
-            end_id = data.find('"""', first_id) + 3
-            data = data[end_id:]
-        elif "'''" in data:
-            first_id = data.find("'''") + 3
-            end_id = data.find("'''", first_id) + 3
-            data = data[end_id:]
-        else:
-            new_line = "\n".join([word for word in data.strip().split("\n") if
-                                  not word.startswith("def") and not word.startswith("from")])
-            data = new_line
-    data = data.replace('<|endoftext|>', '')
-
-    return data
-
-
-def generate_prompt(language, input):
-    INSTRUCTION = f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-Create a {language} script for this problem:
-{input}
-
-### Response:"""
-    return INSTRUCTION
-
-
-def load_data(eval_dataset):
-    data = []
-    data_path = EVAL_DATASET.get(eval_dataset)
-    if not data_path:
-        raise ValueError("unknown eval_dataset")
-    try:
-        with gzip.open(data_path, "r") as f:
-            for line in f:
-                try:
-                    data.append(json.loads(line))
-                except json.JSONDecodeError as e:
-                    print(f"Error processing line: {line}")
-                    print(e)
-    except gzip.BadGzipFile:
-        with open(data_path, "r") as f:
-            for line in f:
-                try:
-                    data.append(json.loads(line))
-                except json.JSONDecodeError as e:
-                    print(f"Error processing line: {line}")
-                    print(e)
-    return data
-
-
-def process_generation(generated_code, language):
-    code = generated_code
-    if language == "python" or language == "matplotlib" or language == "numpy" or language == "Pandas":
-        generation = ""
-        for line in code.split("\n"):
-            if line and line[0] != ' ':
-                break
-            generation += line + "\n"
-
-    elif language == "cpp":
-        generation = ""
-        for line in code.split("\n"):
-            if line and line.startswith("int main"):
-                break
-            generation += line + "\n"
-
-    elif language == "js" or language == "java" or language == "go" or language == "rust":
-        generation = ""
-        for line in code.split("\n"):
-            generation += line + "\n"
-            if line == "}" or line == "};":
-                break
+def inference(model_name="CodeFuse-CodeLlama-34B",
+              model_version="v1",
+              eval_dataset="humaneval_python",
+              output_file="./result.jsonl",
+              task_mode=None,
+              **kwargs):
+    """
+    The main process for model to inference eval dataset and generate the result
+    """
+    if isinstance( eval_dataset, str ):
+        if eval_dataset not in EVAL_DATASET:
+            raise ValueError( f"eval_dataset {eval_dataset} not in [EVAL_DATASET]. please registry in util.py" )
+        if eval_dataset not in DATASET_SUPPORT:
+            raise ValueError( f"eval_dataset {eval_dataset} is not [DATASET_SUPPORT]. please registry in util.py" )
+        if eval_dataset not in DATASET_LANGUAGE:
+            raise ValueError( f"eval_dataset {eval_dataset} is not [DATASET_LANGUAGE]. please registry in util.py" )
+    elif isinstance( eval_dataset, list ):
+        if not all( [dataset in EVAL_DATASET for dataset in eval_dataset] ):
+            illegal_dataset = [dataset for dataset in eval_dataset if dataset not in EVAL_DATASET]
+            raise ValueError( f"eval_datasets {illegal_dataset} not in [EVAL_DATASET]. please registry in util.py" )
+        if not all( [dataset in DATASET_SUPPORT for dataset in eval_dataset] ):
+            illegal_dataset = [dataset for dataset in eval_dataset if dataset not in DATASET_SUPPORT]
+            raise ValueError( f"eval_datasets {illegal_dataset} is not [DATASET_SUPPORT]. please registry in util.py" )
+        if not all( [dataset in DATASET_LANGUAGE for dataset in eval_dataset] ):
+            illegal_dataset = [dataset for dataset in eval_dataset if dataset not in DATASET_LANGUAGE]
+            raise ValueError( f"eval_datasets {illegal_dataset} is not [DATASET_LANGUAGE]. please registry in util.py" )
     else:
-        generation = code
-    return generation
+        raise ValueError( "eval_dataset parameter must be string or list" )
 
+    if task_mode is None:
+        print( "[task_mode] parameter is None. Loading default task mode for corresponding dataset" )
+        if isinstance( eval_dataset, list ):
+            task_mode = [DATASET_SUPPORT.get( dataset )[0] for dataset in eval_dataset]
+        if isinstance( eval_dataset, str ):
+            task_mode = DATASET_SUPPORT.get( eval_dataset )[0]
+    # load and check dataset
+    if not ((isinstance( eval_dataset, list ) and isinstance( task_mode, list ) and len( eval_dataset ) == len( task_mode )
+             and all( [mode in DATASET_SUPPORT.get( dataset, [] ) for dataset, mode in zip( eval_dataset, task_mode )] )) or
+            (isinstance( eval_dataset, str ) and isinstance( task_mode, str ) and task_mode in DATASET_SUPPORT.get( eval_dataset, [] ))):
+        raise ValueError( "eval_dataset and task_mode must both be string or list. When both are list, the list length must be the same, "
+                          "and the task_mode must be among the task_modes supported by eval_datasets." )
 
-def extract_code_from_response(output_ori):
-    response_start = "### Response:"
-    print(output_ori)
-    response_index = output_ori.find(response_start)
-    if response_index == -1:
-        return output_ori
-    code = output_ori[response_index + len(response_start):]
-    return code
+    if CKPT_CONFIG.get( model_name, None ) is None:
+        raise ValueError( f"{model_name} not find in ckpt_config.json, please config model first" )
+    if CKPT_CONFIG.get( model_name, {} ).get( model_version, None ) is None:
+        raise ValueError( f"{model_version} not find in {model_name} in ckpt_config.json, please config model first" )
 
+    language = DATASET_LANGUAGE.get( eval_dataset )
+    if not isinstance( eval_dataset, list ):
+        eval_datasets = [eval_dataset]
+        task_modes = [task_mode]
+    else:
+        eval_datasets = eval_dataset
+        task_modes = task_mode
 
-def write_jsonl(data, output_path):
-    output_dir = os.sep.join(output_path.split(os.sep)[:-1])
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    path = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "path", None )
+    process_loader = load_modelprocess( model_name, model_version )
 
-    with open(output_path, "w", encoding='utf-8') as f:
-        for item in data:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
-    return
+    print( "********* path *********" )
+    print( "path========: ", path )
+    print( "loading model========  " )
+    st = time.time()
+    model, tokenizer = process_loader.load_model_tokenizer( path )
+    print( 'Model load spend: {:.4f}s'.format( time.time() - st ) )
 
+    generation_datasets = {}
+    for eval_dataset, task_mode in zip( eval_datasets, task_modes ):
+        data_path = EVAL_DATASET.get( eval_dataset )
+        if data_path is None:
+            raise ValueError( f"{eval_dataset} is not support, can not find current dataset information" )
+        if not os.path.exists( data_path ):
+            raise ValueError( f"{eval_dataset} corresponding data_path is {data_path}, file not exist" )
+        if not DATASET_SUPPORT.get( eval_dataset ):
+            raise ValueError( f"current dataset {eval_dataset} not set support tasks, please set in util.py" )
+        print( f"current generation task task mode is {task_mode}" )
 
-def inference(model, tokenizer, eval_dataset, model_name, decode_mode, sample_num, batch_size, temperature, task_mode,
-              mbpp_mode, language):
-    data = load_data(eval_dataset)
-    eval_data = []
-    prompt_list = []
-    item_list = []
-    count = 0
-    for item in tqdm(data):
-        # modify prompt
-        if model_name == "CodeFuse-13B":
-            # 代码续写
-            if task_mode == "code_completion":
-                prompt_origin = item["prompt"].replace('    ', '\t')
-                prompt = generate_prompt(language, prompt_origin)
-            else:  # 自然语言到代码、其他
-                prompt = item["prompt"]
-        else:  # model_name = "CodeFuse-CodeLlama-34B":
-            # 代码续写
-            if task_mode == "code_completion":
-                language_tag = LANGUAGE_TAG[language]
-                prompt_origin = language_tag + "\n" + item["prompt"]
-                prompt = HUMAN_ROLE_START_TAG + prompt_origin + BOT_ROLE_START_TAG
-            # 自然语言到代码
-            elif task_mode == "text_to_code":
-                prompt_origin = get_tc_prompt(mbpp_mode, item)
-                prompt = HUMAN_ROLE_START_TAG + prompt_origin + BOT_ROLE_START_TAG
+        dataset_origin = load_dataset( data_path )
+        batch_size = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "batch_size", 1 )
+        sample_num = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "sample_num", 1 )
+
+        if path is None or not os.path.exists( path ):
+            raise ValueError( f"The path: {path} of the current model: {model_name} does not exist " )
+
+        if "mbpp" in eval_dataset:
+            if not CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "mbpp_mode" ):
+                print( "Can not find mbpp_mode, use default value 「mbpp_mode」is 「en」" )
+                mbpp_mode = "en"
             else:
-                prompt = item["prompt"]
-        print(item["task_id"] + "\n" + prompt)
+                mbpp_mode = CKPT_CONFIG.get( model_name, {} ).get( model_version, {} ).get( "mbpp_mode" )
+            dataset = process_loader.process_before( dataset_origin, language, task_mode, eval_dataset, mbpp_mode=mbpp_mode )
+        else:
+            dataset = process_loader.process_before( dataset_origin, language, task_mode, eval_dataset )
 
-        # generate outputs
-        item_list.append(item)
-        prompt_list.append(prompt)
-        count += 1
-        if prompt_list and len(prompt_list) % batch_size == 0 or count == len(prompt_list):
-            # sample_num: 对同一prompt生成几个不同的答案
-            for _ in range(sample_num):
-                outputs = generate_outputs(model, tokenizer, prompt_list, decode_mode, temperature, model_name)
-                print(f"outputs*******:\n {outputs}")
-                for idx, a_prompt in enumerate(prompt_list):
-                    print(f"********* prompt *********:\n{a_prompt}")
-                    output_ori = outputs[idx]
-                    print(f"********* before data *********:\n{output_ori}")
-                    # 代码补全场景
-                    if task_mode == "code_completion":
-                        if model_name == "CodeFuse-13B":
-                            generation = extract_code_from_response(output_ori).replace('\t', '    ')
-                            generation = post_process_mkcode(language, generation)
-                        else:
-                            generation = output_ori
-                            generation = post_process_mkcode(language, generation)
-                            generation = process_generation(generation, language)
+        all_prompt_list = [data.get( "prompt", None ) for data in dataset]
+        eval_data = []
+        if all_prompt_list or all( all_prompt_list ):
+            if len( all_prompt_list ) % batch_size == 0:
+                batch_num = len( all_prompt_list ) // batch_size
+                # 将prompt和data同时batch化，然后根据显存情况设置合适的batch大小。
+                batch_prompt_list = [all_prompt_list[batch_index * batch_size: (batch_index + 1) * batch_size] for batch_index in range( batch_num )]
+                batch_dataset = [dataset[batch_index * batch_size: (batch_index + 1) * batch_size] for batch_index in range( batch_num )]
+                index = 0
+                for prompt_list in tqdm( batch_prompt_list ):
+                    for _ in range( sample_num ):
+                        # 一个batch的推理时间，时间按照batch大小进行平均分配。
+                        start_time = time.time()
+                        outputs = generate_outputs( model, tokenizer, prompt_list, model_name, model_version )
+                        endtime = time.time()
+                        for data, out in zip( batch_dataset[index], outputs ):
+                            # print(f"data*********:\n{data}")
+                            data["generation"] = out
+                            data["processing_time"] = (endtime - start_time) / len( prompt_list )
+                            eval_data.append( data )
+                            print( f"outputs*******:\n {outputs}" )
+                        print( f"current batch size is {batch_size},current batch generation cost time is {endtime - start_time}" )
+                    index += 1
+                total_time_cost = sum( [item.get( "processing_time", 0 ) for item in eval_data] )
+                print( f"Generation Total time cost: {total_time_cost}" )
+                print( f"Generation Average time cost: {total_time_cost / len( eval_data )}" )
+                process_loader.process_after( eval_data, language, task_mode, eval_dataset )
+                print( [model_name, model_version, eval_dataset, task_mode] )
+                key = "_".join( [model_name, model_version, eval_dataset, task_mode] )
+                if key not in eval_datasets:
+                    generation_datasets[key] = eval_data
+            else:
+                raise ValueError( "prompt_list length is not divisible by batch_size,"
+                                  "prompt_list length and batch_size respectively are",
+                                  len( all_prompt_list ), batch_size )
+        else:
+            raise ValueError( "current prompt list is empty or all prompts are empty, "
+                              "please check your dataset prompt", all_prompt_list )
 
-                    else:
-                        generation = post_process_mkcode(language, output_ori)
-                    print(f"********* generation *********:\n{generation}")
-                    new_item = deepcopy(item_list[idx])
-                    new_item["generation"] = generation
+        # pipeline使用，主要是将模型在不同数据集上的数据分别进行保存
 
-                    eval_data.append(new_item)
+    # 写入总数据文件，如果当前数据集大于1,分别写文件。
+    write_list = []
+    for _, value in generation_datasets.items():
+        write_list.extend( value )
+    write_jsonl( write_list, output_file )
+    if len( eval_datasets ) > 1:
+        for key, value in generation_datasets.items():
+            file_name = "./pipeline/" + key + "_" + "generation.jsonl"
+            write_jsonl( value, file_name )
 
-            prompt_list = []
-            item_list = []
-    return eval_data
-
-
-def main(
-        ## 必填参数
-        # 数据集相关
-        eval_dataset: str = "mbpp",
-        # 模型相关
-        model_name: str = 'CodeFuse-CodeLlama-34B',
-        # 推理结果存储位置
-        output_file: str = "result.jsonl",
-
-        ## 非必填
-        # 运行相关
-        batch_size: int = 1,
-        # 模型相关
-        temperature: float = 0.2,
-        decode_mode: str = 'beams',
-        sample_num: int = 1,
-        # 推理场景相关
-        # 推理场景，代码续写：code_completion, 自然语言到代码：text_to_code
-        task_mode: str = "code_completion",
-        # 自然语言语种，支持en和cn
-        mbpp_mode: str = "en",
-        # 编程语言类型
-        language: str = "python"
-):
-    print("********* params *********")
-    print(
-        f"eval_dataset={eval_dataset}, model_name={model_name}, decode_mode={decode_mode}, sample_num={sample_num}, "
-        f"batch_size={batch_size}, temperature={temperature}, language={language}, output_file={output_file},"
-        f" task_mode={task_mode}, mbpp_mode={mbpp_mode}")
-
-    ckpt_dict = json.load(open("codefuseEval/ckpt_config.json"))
-    ckpt_path = ckpt_dict[model_name].get("path")
-    if not ckpt_path:
-        raise ValueError("unknown ckpt_version")
-    if not output_file.endswith(".jsonl"):
-        raise ValueError("output file should be jsonl")
-
-    print("Using {} ckpt version, is chat: {}, output file: {}".format(model_name, decode_mode, output_file))
-
-    # load tokenizer
-    model, tokenizer = load_model_tokenizer(ckpt_path, model_name)
-
-    # generation outputs
-    eval_data = inference(
-        model, tokenizer, eval_dataset, model_name, decode_mode, sample_num, batch_size, temperature, task_mode,
-        mbpp_mode, language
-    )
-
-    # persist result
-    _ = write_jsonl(eval_data, output_file)
+    return generation_datasets
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    fire.Fire( inference )

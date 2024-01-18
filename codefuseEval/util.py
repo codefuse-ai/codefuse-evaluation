@@ -5,124 +5,9 @@ from typing import *
 import gzip
 import json
 
-# import lib for current language
-IMPORT_HELPER = {
-    "python": [
-        "from math import *",
-        "import math",
-        "import re",
-        "import sys",
-        "import copy",
-        "import datetime",
-        "import itertools",
-        "import collections",
-        "import heapq",
-        "import statistics",
-        "import functools",
-        "import hashlib",
-        "import numpy",
-        "import numpy as np",
-        "import string",
-        "from typing import *",
-        "from collections import *",
-        "from itertools import combinations_with_replacement",
-        "import cmath",
-        "import collections as ct",
-        "import heapq as hq",
-        "from collections import Counter",
-        "from itertools import chain",
-        "from heapq import heappop, heappush",
-        "from operator import itemgetter",
-        "from itertools import groupby",
-        "from copy import deepcopy"
 
-    ],
-    "go": [
-        "math",
-        "strings",
-        "fmt",
-        "strconv",
-        "time",
-        "bytes",
-        "regexp",
-        "sort",
-        "math/rand",
-        "crypto/md5",
-    ],
-    "cpp": [
-        "#include<stdlib.h>",
-        "#include<algorithm>",
-        "#include<math.h>",
-        "#include<stdio.h>",
-        "#include<vector>",
-        "#include<string>",
-        "#include<climits>",
-        "#include<cstring>",
-        "#include<iostream>",
-    ],
-}
+import os
 
-#language tag for different language
-LANGUAGE_TAG = {
-    "c": "// language: C",
-    "c++": "// language: C++",
-    "cpp": "// language: C++",
-    "c#": "// language: C#",
-    "csharp": "// language: C#",
-    "css": "/* language: CSS */",
-    "cuda": "// language: Cuda",
-    "dart": "// language: Dart",
-    "lua": "// language: Lua",
-    "objectivec": "// language: Objective-C",
-    "objective-c": "// language: Objective-C",
-    "objective-c++": "// language: Objective-C++",
-    "python": "# language: Python",
-    "perl": "# language: Perl",
-    "prolog": f"% language: Prolog",
-    "swift": "// language: swift",
-    "lisp": "; language: Lisp",
-    "java": "// language: Java",
-    "scala": "// language: Scala",
-    "tex": f"% language: TeX",
-    "vue": "<!--language: Vue-->",
-    "markdown": "<!--language: Markdown-->",
-    "html": "<!--language: HTML-->",
-    "php": "// language: PHP",
-    "js": "// language: JavaScript",
-    "javascript": "// language: JavaScript",
-    "typescript": "// language: TypeScript",
-    "go": "// language: Go",
-    "shell": "# language: Shell",
-    "rust": "// language: Rust",
-    "sql": "-- language: SQL",
-    "kotlin": "// language: Kotlin",
-    "vb": "' language: Visual Basic",
-    "ruby": "# language: Ruby",
-    "pascal": "// language: Pascal",
-    "r": "# language: R",
-    "fortran": "!language: Fortran",
-    "lean": "-- language: Lean",
-    "matlab": f"% language: Matlab",
-    "delphi": "{language: Delphi}",
-    "scheme": "; language: Scheme",
-    "basic": "' language: Basic",
-    "assembly": "; language: Assembly",
-    "groovy": "// language: Groovy",
-    "abap": "* language: Abap",
-    "gdscript": "# language: GDScript",
-    "haskell": "-- language: Haskell",
-    "julia": "# language: Julia",
-    "elixir": "# language: Elixir",
-    "excel": "' language: Excel",
-    "clojure": "; language: Clojure",
-    "actionscript": "// language: ActionScript",
-    "solidity": "// language: Solidity",
-    "powershell": "# language: PowerShell",
-    "erlang": f"% language: Erlang",
-    "cobol": "// language: Cobol",
-}
-
-#eval dataset registry, support jsonlfile or jsonl.gz file
 EVAL_DATASET = {
     "humaneval_python": os.path.join( os.path.dirname( __file__ ), "data", "code_completion", "humaneval_python.jsonl" ),
     "humaneval_python_cn": os.path.join( os.path.dirname( __file__ ), "data", "code_completion", "humaneval_python_cn.jsonl" ),
@@ -157,7 +42,6 @@ EVAL_DATASET = {
 
 }
 
-#eval dataset support tasks.
 DATASET_SUPPORT = {
     "humaneval_python": ["code_completion"],
     "humaneval_python_cn": ["code_completion"],
@@ -189,8 +73,97 @@ DATASET_SUPPORT = {
     "codeInsertion_tensorflow":["codescience"]
 }
 
+
+DATASET_LANGUAGE = {
+    "humaneval_python": "python",
+    "humaneval_python_cn": "python",
+    "humaneval_js": "js",
+    "humaneval_java": "java",
+    "humaneval_go": "go",
+    "humaneval_rust": "rust",
+    "humaneval_cpp": "cpp",
+    "mbpp": "python",
+    "codeTrans_python_to_java":"java",
+    "codeTrans_python_to_cpp": "cpp",
+    "codeTrans_cpp_to_java": "java",
+    "codeTrans_cpp_to_python": "python",
+    "codeTrans_java_to_python": "python",
+    "codeTrans_java_to_cpp": "cpp",
+    "codeCompletion_matplotlib":"python",
+    "codeCompletion_numpy":"python",
+    "codeCompletion_pandas":"python",
+    "codeCompletion_pytorch":"python",
+    "codeCompletion_scipy":"python",
+    "codeCompletion_sklearn":"python",
+    "codeCompletion_tensorflow":"python",
+    "codeInsertion_matplotlib":"python",
+    "codeInsertion_numpy":"python",
+    "codeInsertion_pandas":"python",
+    "codeInsertion_pytorch":"python",
+    "codeInsertion_scipy":"python",
+    "codeInsertion_sklearn":"python",
+    "codeInsertion_tensorflow":"python"
+}
+
 # model decode strategy
 ALL_DECODE_MODE = ["greedy", "beams", "dosample"]
+
+# import lib for current language
+IMPORT_HELPER = {
+    "python": [
+        "import math",
+        "import unittest",
+        "import re",
+        "import sys",
+        "import copy",
+        "import datetime",
+        "import itertools",
+        "import collections",
+        "import heapq",
+        "import statistics",
+        "import functools",
+        "import hashlib",
+        "import numpy",
+        "import numpy as np",
+        "import string",
+        "from typing import *",
+        "from collections import *",
+    ],
+    "go": [
+        "math",
+        "strings",
+        "fmt",
+        "strconv",
+        "time",
+        "bytes",
+        "regexp",
+        "sort",
+        "math/rand",
+        "crypto/md5",
+    ],
+    "cpp": [
+        "#include<stdlib.h>",
+        "#include<algorithm>",
+        "#include<math.h>",
+        "#include<stdio.h>",
+        "#include<vector>",
+        "#include<string>",
+        "#include<climits>",
+        "#include<cstring>",
+        "#include<iostream>",
+        "#include <stdexcept>",
+    ],
+    "java": [
+        "import java.io.*;",
+        "import java.lang.*;",
+        "import java.util.*;",
+        "import java.math.*;",
+
+    ]
+}
+
+
+#eval dataset registry, support jsonlfile or jsonl.gz file
 
 def read_dataset(
         data_file: str = None,
