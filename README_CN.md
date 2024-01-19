@@ -3,9 +3,18 @@
 <p align="center">
   <img src="https://github.com/codefuse-ai/MFTCoder/blob/main/assets/github-codefuse-logo-update.jpg" width="50%" />
 </p>
+<div align="center">
+  <p>
+    <a href="README.md" target="_blank">English</a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/github/stars/codefuse-ai/codefuse-evaluation?style=social" alt="GitHub stars"/>
+    <img src="https://img.shields.io/github/forks/codefuse-ai/codefuse-evaluation?style=social" alt="GitHub forks"/>
+    <img src="https://img.shields.io/github/issues/codefuse-ai/codefuse-evaluation" alt="GitHub issues"/>
+  </p>
+  
+</div>
 CodeFuseEval在HumanEval-x、MBPP的基准上，结合CodeFuse大模型多任务场景，开发的编程领域多任务的评测基准， 可用于评估模型在代码补全，自然语言生成代码，测试用例生成、跨语言代码翻译，中文指令生成代码等多类任务的性能。持续开放中，敬请期待！
-
-🌐 <a href="README.md" target="_blank">English</a>
 
 ![img](./figures/中文介绍.png)
 
