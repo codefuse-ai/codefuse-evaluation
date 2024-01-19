@@ -1,14 +1,26 @@
 # CodeFuseEval: Multi-tasking Evaluation Benchmark for Code Large Language Model
-
 <p align="center">
   <img src="https://github.com/codefuse-ai/MFTCoder/blob/main/assets/github-codefuse-logo-update.jpg" width="50%" />
 </p>
+<div align="center">
+  <p>
+    <a href="README_CN.md" target="_blank">简体中文</a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/github/stars/codefuse-ai/codefuse-evaluation?style=social" alt="GitHub stars"/>
+    <img src="https://img.shields.io/github/forks/codefuse-ai/codefuse-evaluation?style=social" alt="GitHub forks"/>
+    <img src="https://img.shields.io/github/issues/codefuse-ai/codefuse-evaluation" alt="GitHub issues"/>
+  </p>
+  
+</div>
+
 CodeFuseEval is a Code Generation benchmark that combines the multi-tasking scenarios of CodeFuse Model with the benchmarks of HumanEval-x and MBPP. This benchmark is designed to evaluate the performance of models in various multi-tasking tasks, including code completion, code generation from natural language, test case generation, cross-language code translation, and code generation from Chinese commands, among others.Continuously open, stay tuned !
 
+<p>
+    <img src="./figures/EnglishIntroduction.png" alt="English Introduction"/>
+</p>
 
-🌐 <a href="README_CN.md" target="_blank">中文</a>
 
-![img](./figures/EnglishIntroduction.png)
 
 ## Generation environment：
 CodeFuse-13B: Python 3.8 or above,PyTorch 1.12 or above, with a recommendation for 2.0 or above, Transformers 4.24.0 or above ,CUDA 11.4 or above (for GPU users and flash-attention users, this option should be considered).
