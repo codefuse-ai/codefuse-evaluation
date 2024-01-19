@@ -4,7 +4,9 @@
 </p>
 <div align="center">
   <p>
-    <a href="README_CN.md" target="_blank">简体中文</a>
+    <a href="README_CN.md" target="_blank">简体中文</a>｜
+    <a href="https://modelscope.cn/datasets/codefuse-ai/CodeFuseEval/summary" target="_blank">CodeFuseEval on ModelScope</a>｜
+    <a href="https://huggingface.co/datasets/codefuse-ai/CodeFuseEval" target="_blank">CodeFuseEval on Hugging Face</a>
   </p>
   <p>
     <img src="https://img.shields.io/github/stars/codefuse-ai/codefuse-evaluation?style=social" alt="GitHub stars"/>
