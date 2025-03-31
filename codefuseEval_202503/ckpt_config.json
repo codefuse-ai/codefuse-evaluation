@@ -1,0 +1,777 @@
+{
+  "CodeFuse-13B": {
+    "path": "/mnt/model/CodeFuse13B-evol-instruction-4K/",
+    "v1": {
+      "generator_class": "codefuseEval.generator.codefuse13b.Codefuse13BProcessor",
+      "tokenizer": {
+        "truncation": true,
+        "padding": true,
+        "max_length": 600,
+        "return_tensors": "pt"
+      },
+      "generation_config": {
+        "greedy": {
+          "do_sample": false,
+          "num_beams": 1,
+          "max_new_tokens": 512
+        },
+        "beams": {
+          "do_sample": false,
+          "num_beams": 5,
+          "max_new_tokens": 600,
+          "num_return_sequences": 1
+        },
+        "dosample": {
+          "da_sample": true
+        },
+        "temperature": 0.2,
+        "max_new_tokens": 600,
+        "num_return_sequences": 1,
+        "top_p": 0.9,
+        "num_beams": 1,
+        "do_sample": true
+      },
+      "batch_size": 1,
+      "sample_num": 1,
+      "decode_mode": "beams"
+    }
+  },
+  "CodeFuse-CodeLlama-34B": {
+    "path": "/mnt/merged_models/codellama-34b-python-mft-qlora-v1-step22000-merged",
+    "v1": {
+      "generator_class": "codefuseEval.generator.codefusellama34b.CodeFuseCodeLlama34BProcessor",
+      "tokenizer": {
+        "truncation": true,
+        "padding": true,
+        "max_length": 512,
+        "return_tensors": "pt"
+      },
+      "generation_config": {
+        "greedy": {
+          "do_sample": false,
+          "num_beams": 1,
+          "max_new_tokens": 512
+        },
+        "beams": {
+          "do_sample": false,
+          "num_beams": 5,
+          "max_new_tokens": 600,
+          "num_return_sequences": 1
+        },
+        "dosample": {
+          "do_sample": true
+        },
+        "temperature": 0.2,
+        "max_new_tokens": 512,
+        "num_return_sequences": 1,
+        "top_p": 0.9,
+        "num_beams": 1,
+        "do_sample": false
+      },
+      "batch_size": 1,
+      "sample_num": 1,
+      "decode_mode": "beams"
+    },
+    "codeEdit_debug_plus": {
+      "generator_class": "codefuseEval.generator.codefusellama34b_codeEdit.CodeFuseCodeLlama34BProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.code_edit_debug_plus_preprocessor.CodeEditDebugPlusPreProcess",
+      "post_processor_class": "codefuseEval.post_processor.code_edit_debug_plus_postprocessor.CodeEditDebugPlusPostProcess",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "qwen-coder15-chat": {
+    "path": "/mnt/user/models/Qwen/CodeQwen1.5-7B-Chat",
+    "multie": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.role_preprocessor.RolePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_postprocessor.MultiePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "qwen-coder25-7B-instruct": {
+    "path": "/mnt/user/models/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "multie": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.role_preprocessor.RolePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_postprocessor.MultiePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_chat_preprocessor.MbppChatPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "Bailing_Code_MoE_Lite_4K_Chat_20250115": {
+    "path": "/ainative/codefuse/user/ckpts/moe_dpo/moe-lite-v4a-sft-v17-fix-ep4-dpo-0115/Bailing_Code_MoE_Lite_4K_Chat_20250115",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "post_processor_class": "codefuseEval.post_processor.multie_postprocessor.MultiePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_postprocessor.Text2SqlPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_preprocessor.BigcodebenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_preprocessor.MbxpCnPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_chat_postprocessor.MbxpChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_preprocessor.MbxpEnPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_chat_postprocessor.MbxpChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.bailing_moe_chat_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_chat_preprocessor.MbppChatPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "Bailing_Code_MoE_Lite_4K_Base_20250115": {
+    "path": "/ainative/codefuse/user/checkpoint/bailing/trained_model/bailing_moe_lite_coder_v4/bailing_moe_lite_coder_v4A_enhance/checkpoints/bailing_moe_lite_coder_v4A_enhance_0110/Bailing_Code_MoE_Lite_4K_Base_20250115",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "post_processor_class": "codefuseEval.post_processor.multie_bailing_base_postprocessor.MultieBailingBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_base_postprocessor.Text2SqlBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_base_preprocessor.BigcodebenchBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_base_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_cn_postprocessor.MbxpBaseCnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_en_postprocessor.MbxpBaseEnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_base_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.bailing_moe_base_hf.Bailingmoe_Processor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_base_preprocessor.MbppBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbpp_base_postprocessor.MbppBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "Qwen1.5-Coder-7B_base": {
+    "path": "/mnt/user/models/Qwen/CodeQwen1.5-7B",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_qwen_base_postprocessor.MultieQwenBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_base_postprocessor.Text2SqlBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_base_preprocessor.BigcodebenchBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_base_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_cn_postprocessor.MbxpBaseCnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_en_postprocessor.MbxpBaseEnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_base_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_qwen_base_postprocessor.HumanevalXQwenBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.qwen_coder15_chat.QwenCoder15InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_base_preprocessor.MbppBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbpp_base_postprocessor.MbppBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "Qwen2.5-Coder-7B_base": {
+    "path": "/mnt/user/models/Qwen/Qwen2.5-Coder-7B",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_qwen_base_postprocessor.MultieQwenBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_base_postprocessor.Text2SqlBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_base_preprocessor.BigcodebenchBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_base_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_cn_postprocessor.MbxpBaseCnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_en_postprocessor.MbxpBaseEnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_base_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_qwen_base_postprocessor.HumanevalXQwenBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.qwen_coder25_instruct.QwenCoderInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_base_preprocessor.MbppBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbpp_base_postprocessor.MbppBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "DeepSeek_Code_V2_Lite_Instruct": {
+    "path": "/ainative/codefuse/DeepSeek-Coder-V2-Lite-Instruct",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_postprocessor.MultiePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_postprocessor.Text2SqlPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_preprocessor.BigcodebenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_preprocessor.MbxpCnPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_chat_postprocessor.MbxpChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_preprocessor.MbxpEnPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_chat_postprocessor.MbxpChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_instruct.DeepSeekCoderV2InstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_chat_preprocessor.MbppChatPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_postprocessor.HumanevalXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "DeepSeek-Coder-V2-Lite_base": {
+    "path": "/mnt/user/models/deepseek-ai/DeepSeek-Coder-V2-Lite-Base",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_deepseek_base_postprocessor.MultieDeepSeekBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_base_postprocessor.Text2SqlBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_base_preprocessor.BigcodebenchBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_base_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_base_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_chat_postprocessor.MbxpChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_chat_postprocessor.MbxpChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_base_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_deepseek_base_postprocessor.HumanevalXDeepSeekBasePreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.deepseek_code_v2_lite_base.DeepSeekCoderV2BaseInstructProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_chat_preprocessor.MbppChatPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbpp_deepSeek_base_postprocessor.MbppDeepSeekBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "OpenCoder_8B_Base": {
+    "path": "/ainative/muti-modal/yuhang/models/infly/OpenCoder-8B-Base",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_open_coder_base_postprocessor.MultieOpenCoderBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_base_postprocessor.Text2SqlBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_base_preprocessor.BigcodebenchBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_base_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_cn_postprocessor.MbxpBaseCnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_base_preprocessor.MbxpCnBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_base_en_postprocessor.MbxpBaseEnPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_base_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_open_coder_postprocessor.HumanevalXOpenCoderPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_open_coder_base_preprocessor.MbppOpenCoderBasePreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbpp_open_coder_base_postprocessor.MbppOpenCoderBasePostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  },
+  "OpenCoder_8B_Instruct": {
+    "path": "/ainative/muti-modal/yuhang/models/infly/OpenCoder-8B-Instruct",
+    "humanevalfix": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humanevalfix_preprocessor.HumanevalFixPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humanevalfix_postprocessor.HumanevalFixPreProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "multie": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "post_processor_class": "codefuseEval.post_processor.multie_open_coder_chat_postprocessor.MultieOpenCoderChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "text2sql": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.text2sql_preprocessor.Text2SqlPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.text2sql_openCoder_postprocessor.Text2SqlOpenCoderPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "bigcodebench": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.bigcodebench_preprocessor.BigcodebenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.bigcodebench_postprocessor.BigCodeBenchPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "livecodebench": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.livecodebench_preprocessor.LiveCodeBenchPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.base_markdown_postprocessor.BaseMarkdownPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-input": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_input_preprocessor.CRUXInputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "crux-o-output": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.crux_output_preprocessor.CRUXOutputPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.crux_postprocessor.CRUXPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-cn": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_cn_preprocessor.MbxpCnPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_open_coder_chat_postprocessor.MbxpOpenCoderChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbxp-en": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbxp_en_preprocessor.MbxpEnPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.mbxp_open_coder_chat_postprocessor.MbxpOpenCoderChatPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "humaneval_x": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.humaneval_x_preprocessor.HumanevalXPreprocessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_open_coder_postprocessor.HumanevalXOpenCoderPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    },
+    "mbpp": {
+      "generator_class": "codefuseEval.generator.open_coder_model.OpenCoderProcessor",
+      "pre_processor_class": "codefuseEval.pre_processor.mbpp_chat_preprocessor.MbppChatPreProcessor",
+      "post_processor_class": "codefuseEval.post_processor.humaneval_x_open_coder_postprocessor.HumanevalXOpenCoderPostProcessor",
+      "batch_size": 1,
+      "sample_num": 1
+    }
+  }
+}
