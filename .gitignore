@@ -150,3 +150,6 @@ dmypy.json
 
 # asdf tool versions
 .tool-versions
+
+# Claude Code settings
+.claude/*

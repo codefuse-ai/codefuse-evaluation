@@ -1,0 +1,89 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "codefuse-eval-testing"
+version = "0.1.0"
+description = "CodeFuse evaluation framework for code generation models - Testing Setup"
+authors = ["CodeFuse Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.11.1"
+pandas = "^2.0.0"
+numpy = "^1.24.0"
+
+[tool.poetry.scripts]
+test = "pytest"
+tests = "pytest"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=tests",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80"
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: marks tests as unit tests",
+    "integration: marks tests as integration tests", 
+    "slow: marks tests as slow running"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+
+[tool.coverage.run]
+source = ["tests"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/build/*",
+    "*/dist/*",
+    "*/docker/*",
+    "*/figures/*",
+    "*/data/*",
+    "*/result/*",
+    "*/script/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod"
+]
+ignore_errors = true
+show_missing = true
+skip_covered = false
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
