@@ -678,7 +678,7 @@ def check_currentmetric(sample_jsonl, metric, lang="python", **kwargs):
         references = [sample.get("reference", None) if sample.get("reference", None) is not None else sample.get(
             "canonical_solution", "") for sample in sample_jsonl]
         if metric == "accuracy" or metric == "f1":
-            predictions = [0 if prediction == reference else 1 for prediction, reference in
+            predictions = [1 if prediction == reference else 0 for prediction, reference in
                            zip(predictions, references)]
             references = [1] * len(references)
         if metric == "bleu":
